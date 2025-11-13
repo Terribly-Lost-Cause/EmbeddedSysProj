@@ -17,3 +17,4 @@ void motors_right(void);
 // Speed control (0-100%)
 void motors_set_speed(uint8_t pct);
 uint8_t motors_get_speed(void);
+void motors_forward_bias(int8_t left_bias, int8_t right_bias);

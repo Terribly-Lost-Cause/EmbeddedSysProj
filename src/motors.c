@@ -158,3 +158,18 @@ void motors_right(void) {
     g_state = STATE_RIGHT;
     apply_state();
 }
+
+
+void motors_forward_bias(int8_t left_bias, int8_t right_bias) {
+    int l_pct = g_speed_pct + left_bias;
+    int r_pct = g_speed_pct + right_bias;
+
+    if (l_pct < 0) l_pct = 0;
+    if (l_pct > 100) l_pct = 100;
+    if (r_pct < 0) r_pct = 0;
+    if (r_pct > 100) r_pct = 100;
+
+    pwm_set_pct(L_IN1, l_pct); pwm_set_pct(L_IN2, 0);
+    pwm_set_pct(R_IN1, r_pct); pwm_set_pct(R_IN2, 0);
+}
+
