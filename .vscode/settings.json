@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "stdlib.h": "c",
+        "encoder.h": "c",
+        "imu.h": "c",
+        "math.h": "c"
+    },
+
+    "files.exclude": {
+        "**/*.bin": true,
+        "**/*.elf": true,
+        "**/*.hex": true,
+        "**/*.map": true,
+        "**/*.dis": true,
+        "**/*.o": true,
+        "**/*.d": true
+    }
+}

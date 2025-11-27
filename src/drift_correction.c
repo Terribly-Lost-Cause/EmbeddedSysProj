@@ -1,30 +1,30 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <math.h>
 #include "pico/stdlib.h"
 #include "encoder.h"
 #include "motors.h"
-#include "imu.h"
 
+// --- Configuration ---
 #define LEFT_ENCODER_PIN 2
 #define RIGHT_ENCODER_PIN 6
 #define PULSES_PER_REV 20
-#define CONTROL_LOOP_MS 100
-#define DEFAULT_SPEED 40
-#define MAX_BIAS 6
-#define MAX_AUTO_BIAS 5
-#define KP_HEADING 0.18f
-#define DEAD_BAND_HEADING 6.0f
-#define IMU_WINDOW 7                    // Number of samples for heading median filter
-#define HEADING_JUMP_MAX 45.0f          // Max IMU jump allowed between updates
-#define BIAS_LEARN_INTERVAL 100         // Encoder adaptive bias update interval
-#define BIAS_LEARN_STEP 1               // Per-interval bias update amount
-#define BIAS_LEARN_LIMIT 5              // Max persistent bias value
+#define CONTROL_LOOP_MS 10
+#define CALIBRATION_SPEED 30
+#define DEFAULT_SPEED 30
 
+// --- Auto Test Configuration ---
+#define AUTO_START_DELAY_MS 3000   // Wait 3 seconds before starting
+#define AUTO_RUN_DURATION_MS 10000 // Run for 10 seconds
+#define AUTO_STOP_DURATION_MS 5000 // Stop for 5 seconds before next run
+#define AUTO_TEST_CYCLES 1         // Number of test cycles (changed from 3 to 1)
+
+// --- Aggressive Correction ---
+#define MAX_CORRECTION 15
+
+// --- Robot State ---
 typedef struct {
-    float target_heading;
-    float current_heading;
-    float heading_error;
     int8_t left_bias;
     int8_t right_bias;
     uint32_t left_pulses;
@@ -32,209 +32,224 @@ typedef struct {
     bool active;
 } drift_correction_t;
 
+typedef enum {
+    STATE_IDLE,
+    STATE_WAITING_TO_START,
+    STATE_RUNNING,
+    STATE_STOPPED,
+    STATE_COMPLETE
+} test_state_t;
+
+typedef struct {
+    test_state_t state;
+    uint32_t cycle_count;
+    absolute_time_t state_start_time;
+    bool auto_mode_enabled;
+} auto_test_t;
+
 static drift_correction_t dc = {0};
-static int32_t prev_left_pulses = 0;
-static int32_t prev_right_pulses = 0;
+static auto_test_t test = {STATE_IDLE, 0, {0}, true};
 
-// Stores recent IMU heading values for filtering
-static float heading_buffer[IMU_WINDOW] = {0};
-static int heading_idx = 0;
-
-// Persistent variables for adaptive encoder bias
-static int persistent_bias = 0;
-static int encoder_diff_accum = 0;
-static int encoder_update_count = 0;
-
-// Compare two float values (for sorting)
-int compare_floats(const void *a, const void *b) {
-    float fa = *(const float *)a, fb = *(const float *)b;
-    return (fa > fb) - (fa < fb);
-}
-
-// Returns median heading from the buffer with new value added
-float imu_median(float new_heading) {
-    heading_buffer[heading_idx] = new_heading;
-    heading_idx = (heading_idx + 1) % IMU_WINDOW;
-    float temp[IMU_WINDOW];
-    for (int i = 0; i < IMU_WINDOW; ++i) temp[i] = heading_buffer[i];
-    qsort(temp, IMU_WINDOW, sizeof(float), compare_floats);
-    return temp[IMU_WINDOW / 2];
-}
-
-// Normalizes angle to [0, 360)
-static float normalize_angle(float angle) {
-    while (angle < 0.0f) angle += 360.0f;
-    while (angle >= 360.0f) angle -= 360.0f;
-    return angle;
-}
-
-// Calculates signed shortest angle difference between two headings
-static float heading_difference(float target, float current) {
-    float diff = target - current;
-    while (diff > 180.0f) diff -= 360.0f;
-    while (diff < -180.0f) diff += 360.0f;
-    return diff;
-}
-
-// Clamps value between min and max
 static int clamp(int value, int min, int max) {
     if (value < min) return min;
     if (value > max) return max;
     return value;
 }
 
-// Initialize hardware and all drift correction variables
+// --- System Setup ---
 void drift_correction_init(void) {
-    printf("Initializing drift correction system...\n");
+    printf("Initializing STRICT encoder matching system...\n");
     encoder_init(LEFT_ENCODER_PIN);
     encoder_init(RIGHT_ENCODER_PIN);
-    imu_init();
     motors_init();
-    dc.target_heading = dc.current_heading = dc.heading_error = 0.0f;
     dc.left_bias = dc.right_bias = dc.left_pulses = dc.right_pulses = dc.active = 0;
-    prev_left_pulses = prev_right_pulses = 0;
-    for (int i = 0; i < IMU_WINDOW; ++i) heading_buffer[i] = 0;
-    heading_idx = 0;
     motors_set_speed(DEFAULT_SPEED);
-    printf(" Encoders: GP%d (L), GP%d (R)\n", LEFT_ENCODER_PIN, RIGHT_ENCODER_PIN);
-    printf(" IMU: Initialized for heading correction\n");
-    printf("Drift correction ready!\n\n");
+    printf("  Mode: ZERO TOLERANCE - Encoders MUST match\n");
+    printf("  Max Correction: ±%d\n", MAX_CORRECTION);
+    printf("Ready!\n\n");
 }
 
-// Start drift correction with current heading as the baseline
+// --- Start Driving ---
 void drift_correction_start(void) {
-    float heading, roll, pitch;
-    imu_read(&heading, &roll, &pitch);
-    dc.target_heading = normalize_angle(heading);
-    for (int i = 0; i < IMU_WINDOW; ++i) heading_buffer[i] = dc.target_heading;
-    heading_idx = 0;
-    dc.current_heading = dc.target_heading;
-    dc.heading_error = 0.0f;
     dc.left_bias = dc.right_bias = dc.left_pulses = dc.right_pulses = 0;
     dc.active = 1;
-    prev_left_pulses = prev_right_pulses = 0;
-    persistent_bias = encoder_diff_accum = encoder_update_count = 0;
-    printf("Drift correction STARTED - Target heading: %.2f°\n", dc.target_heading);
+    printf("STARTED - STRICT encoder matching ACTIVE\n");
 }
 
-// Stop drift correction and reset biases
 void drift_correction_stop(void) {
     dc.active = false;
     dc.left_bias = dc.right_bias = 0;
-    printf("Drift correction STOPPED\n");
+    motors_stop();
+    printf("STOPPED\n");
 }
 
-// Main update loop: one run for each control cycle
+// --- STRICT Encoder Matching - ZERO DIFFERENCE ALLOWED ---
 bool drift_correction_update(void) {
     if (!dc.active) return false;
-
-    // --- Get filtered heading ---
-    float heading, roll, pitch;
-    imu_read(&heading, &roll, &pitch);
-    float med_heading = imu_median(normalize_angle(heading));
-    float heading_step = fabs(med_heading - dc.current_heading);
-    if (heading_step > 180.0f) heading_step = 360.0f - heading_step;
-    if (heading_step < HEADING_JUMP_MAX) dc.current_heading = med_heading;
-
-    // --- Calculate heading correction ---
-    dc.heading_error = heading_difference(dc.target_heading, dc.current_heading);
-    float filtered_error = (fabs(dc.heading_error) >= DEAD_BAND_HEADING) ? dc.heading_error : 0.0f;
-    int heading_bias = clamp((int)(KP_HEADING * filtered_error), -MAX_BIAS, MAX_BIAS);
-
-    // --- Check encoder pulses and adjust biases ---
+    
+    // 1. Read Encoders
     if (encoder_check_pulse(LEFT_ENCODER_PIN)) dc.left_pulses++;
     if (encoder_check_pulse(RIGHT_ENCODER_PIN)) dc.right_pulses++;
-    int left_delta = dc.left_pulses - prev_left_pulses, right_delta = dc.right_pulses - prev_right_pulses;
-    int auto_error = left_delta - right_delta;
-    int auto_bias = clamp(auto_error, -MAX_AUTO_BIAS, MAX_AUTO_BIAS);
-
-    // --- Learn persistent encoder bias (long-term) ---
-    encoder_diff_accum += (int)dc.left_pulses - (int)dc.right_pulses;
-    encoder_update_count++;
-    if (encoder_update_count >= BIAS_LEARN_INTERVAL) {
-        if (encoder_diff_accum > BIAS_LEARN_INTERVAL)
-            persistent_bias = clamp(persistent_bias - BIAS_LEARN_STEP, -BIAS_LEARN_LIMIT, BIAS_LEARN_LIMIT);
-        else if (encoder_diff_accum < -BIAS_LEARN_INTERVAL)
-            persistent_bias = clamp(persistent_bias + BIAS_LEARN_STEP, -BIAS_LEARN_LIMIT, BIAS_LEARN_LIMIT);
-        encoder_diff_accum = 0;
-        encoder_update_count = 0;
+    
+    // 2. Calculate difference
+    int32_t diff = (int32_t)dc.left_pulses - (int32_t)dc.right_pulses;
+    
+    // 3. AGGRESSIVE correction to force zero difference
+    if (diff > 0) {
+        dc.left_bias = -MAX_CORRECTION;
+        dc.right_bias = +MAX_CORRECTION;
+    } else if (diff < 0) {
+        dc.left_bias = +MAX_CORRECTION;
+        dc.right_bias = -MAX_CORRECTION;
+    } else {
+        dc.left_bias = 0;
+        dc.right_bias = 0;
     }
-
-    // --- Combine all bias terms and set motor output ---
-    dc.left_bias = heading_bias - auto_bias + persistent_bias;
-    dc.right_bias = -heading_bias + auto_bias - persistent_bias;
+    
+    // 4. Apply corrections immediately
     motors_forward_bias(dc.left_bias, dc.right_bias);
-
-    prev_left_pulses = dc.left_pulses;
-    prev_right_pulses = dc.right_pulses;
     return true;
 }
 
-// Print current correction status to the terminal
 void drift_correction_print_status(void) {
-    if (!dc.active) { printf("Drift correction: INACTIVE\n"); return; }
-    printf("Target: %6.2f | Current: %6.2f | Error: %+6.2f | Bias: L%+3d R%+3d | Enc: L%5d R%5d | Off %+2d\n",
-        dc.target_heading, dc.current_heading, dc.heading_error,
-        dc.left_bias, dc.right_bias, dc.left_pulses, dc.right_pulses, persistent_bias);
+    if (!dc.active) {
+        printf("Encoder matching: INACTIVE\n");
+        return;
+    }
+    
+    int32_t diff = (int32_t)dc.left_pulses - (int32_t)dc.right_pulses;
+    const char* status_msg = " ✓✓✓ PERFECT MATCH ✓✓✓ ";
+    if (diff > 0) {
+        status_msg = "!! LEFT AHEAD - MAX CORRECTION !!";
+    } else if (diff < 0) {
+        status_msg = "!! RIGHT AHEAD - MAX CORRECTION !!";
+    }
+    
+    printf("L:%lu R:%lu Diff:%+ld | Bias: L%+d R%+d | %s\n",
+           dc.left_pulses, dc.right_pulses, diff,
+           dc.left_bias, dc.right_bias, status_msg);
 }
 
+// --- AUTO TEST STATE MACHINE ---
+void auto_test_init(void) {
+    test.state = STATE_WAITING_TO_START;
+    test.cycle_count = 0;
+    test.state_start_time = get_absolute_time();
+    printf("\n>>> AUTO TEST MODE <<<\n");
+    printf("Starting in %d seconds...\n", AUTO_START_DELAY_MS / 1000);
+    printf("Test duration: %ds RUN\n", AUTO_RUN_DURATION_MS / 1000);
+    printf("Total cycles: 1\n\n");
+}
+
+bool auto_test_update(void) {
+    absolute_time_t now = get_absolute_time();
+    int64_t elapsed_ms = absolute_time_diff_us(test.state_start_time, now) / 1000;
+    
+    switch (test.state) {
+        case STATE_WAITING_TO_START:
+            if (elapsed_ms >= AUTO_START_DELAY_MS) {
+                test.cycle_count++;
+                printf("\n╔════════════════════════════════════════════════╗\n");
+                printf("║  STARTING FORWARD MOTION                       ║\n");
+                printf("╚════════════════════════════════════════════════╝\n\n");
+                motors_forward();
+                drift_correction_start();
+                test.state = STATE_RUNNING;
+                test.state_start_time = now;
+            }
+            break;
+            
+        case STATE_RUNNING:
+            if (elapsed_ms >= AUTO_RUN_DURATION_MS) {
+                motors_stop();
+                drift_correction_stop();
+                printf("\n>>> TEST COMPLETE <<<\n");
+                printf("Final: L:%lu R:%lu | Diff:%ld pulses\n",
+                       dc.left_pulses, dc.right_pulses,
+                       (int32_t)(dc.left_pulses - dc.right_pulses));
+                
+                test.state = STATE_COMPLETE;
+                printf("\n╔════════════════════════════════════════════════╗\n");
+                printf("║           TEST CYCLE COMPLETE                  ║\n");
+                printf("╚════════════════════════════════════════════════╝\n\n");
+                return false; // Signal completion
+            }
+            break;
+            
+        case STATE_COMPLETE:
+            return false;
+            
+        default:
+            break;
+    }
+    
+    return true;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ║                      MAIN PROGRAM                       ║
+// ═══════════════════════════════════════════════════════════
 int main() {
     stdio_init_all();
     sleep_ms(3000);
-
+    
     printf("\n\n╔════════════════════════════════════════════════════════════╗\n");
-    printf("║ ROBOT DRIFT CORRECTION SYSTEM - IMU+Encoder ║\n");
+    printf("║         STRICT ENCODER MATCHING CONTROLLER                ║\n");
+    printf("║               AUTOMATIC TEST MODE                          ║\n");
     printf("╚════════════════════════════════════════════════════════════╝\n\n");
-
+    
     drift_correction_init();
-
-    printf("Commands:\n W - Start forward with drift correction\n S - Stop motors\n + - Increase speed by 5%%\n - - Decrease speed by 5%%\n\nReady! Press 'W' to start...\n\n");
-
+    auto_test_init();
+    
     absolute_time_t last_control_update = get_absolute_time();
     absolute_time_t last_status_print = get_absolute_time();
-    bool motors_running = false;
-
+    
     while (true) {
+        // Manual override always available
         int ch = getchar_timeout_us(0);
         if (ch != PICO_ERROR_TIMEOUT) {
             switch (ch) {
                 case 'w': case 'W':
-                    if (!motors_running) {
-                        motors_forward();
-                        drift_correction_start();
-                        motors_running = true;
-                        printf("\n>>> FORWARD with drift correction <<<\n\n");
-                    }
+                    test.state = STATE_IDLE; // Disable auto mode
+                    test.auto_mode_enabled = false;
+                    motors_forward();
+                    drift_correction_start();
+                    printf("\n>>> MANUAL FORWARD <<<\n\n");
                     break;
                 case 's': case 'S':
+                    test.state = STATE_IDLE;
+                    test.auto_mode_enabled = false;
                     motors_stop();
                     drift_correction_stop();
-                    motors_running = false;
-                    printf("\n>>> STOPPED <<<\n\n");
+                    printf("\n>>> MANUAL STOP <<<\n");
+                    printf("Final: L:%lu R:%lu | Diff:%ld pulses\n\n",
+                           dc.left_pulses, dc.right_pulses,
+                           (int32_t)(dc.left_pulses - dc.right_pulses));
                     break;
-                case '+': case '=': {
-                    uint8_t speed = motors_get_speed();
-                    motors_set_speed(speed + 5);
-                    printf("Speed: %d%%\n", motors_get_speed());
-                }
-                break;
-                case '-': case '_': {
-                    uint8_t speed = motors_get_speed();
-                    motors_set_speed(speed - 5);
-                    printf("Speed: %d%%\n", motors_get_speed());
-                }
-                break;
             }
         }
+        
         absolute_time_t now = get_absolute_time();
+        
+        // Auto test state machine
+        if (test.auto_mode_enabled && test.state != STATE_IDLE) {
+            if (!auto_test_update()) {
+                // Test complete - disable auto mode
+                test.auto_mode_enabled = false;
+            }
+        }
+        
+        // Update correction VERY frequently (every 10ms)
         int64_t control_elapsed_us = absolute_time_diff_us(last_control_update, now);
         if (control_elapsed_us >= CONTROL_LOOP_MS * 1000) {
             drift_correction_update();
             last_control_update = now;
         }
+        
+        // Print status every 300ms
         int64_t status_elapsed_us = absolute_time_diff_us(last_status_print, now);
-        if (status_elapsed_us >= 200000) {
-            if (motors_running) drift_correction_print_status();
+        if (status_elapsed_us >= 300000) {
+            if (dc.active) drift_correction_print_status();
             last_status_print = now;
         }
     }
