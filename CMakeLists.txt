@@ -29,6 +29,7 @@ add_executable(robo_pico
     src/imu.c
     src/encoder.c
     src/uart_comm.c
+    src/drift_correction.c
 )
 
 target_include_directories(robo_pico PRIVATE ${PROJ_INCLUDE_DIRS})
@@ -64,29 +65,6 @@ target_link_libraries(maker_pi_pico
 pico_enable_stdio_usb(maker_pi_pico 1)
 pico_enable_stdio_uart(maker_pi_pico 0)
 pico_add_extra_outputs(maker_pi_pico)
-
-# ==============================================================================
-# TARGET 3: drift_correction — Calibrated navigation with encoders + IMU
-# ==============================================================================
-add_executable(drift_correction
-    src/drift_correction.c
-    src/motors.c
-    src/imu.c
-    src/encoder.c
-)
-
-target_include_directories(drift_correction PRIVATE ${PROJ_INCLUDE_DIRS})
-
-target_link_libraries(drift_correction
-    pico_stdlib
-    hardware_i2c
-    hardware_pwm
-    hardware_gpio
-)
-
-pico_enable_stdio_usb(drift_correction 1)
-pico_enable_stdio_uart(drift_correction 0)
-pico_add_extra_outputs(drift_correction)
 
 # ==============================================================================
 # TARGET 4: auto_turn_test — Automatic turn test sequence (battery operation)
