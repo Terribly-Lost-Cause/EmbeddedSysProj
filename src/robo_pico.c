@@ -10,6 +10,44 @@
 #include "uart_comm.h"
 #include "drift_correction.h"
 
+// Convert encoder pulses to signed distance in meters
+float signed_distance(int pulses, int pulses_per_rev, float wheel_radius, int direction)
+{
+    float dist = distance_from_pulses(pulses, pulses_per_rev, wheel_radius);
+    return direction * dist; // +1 forward, -1 backward
+}
+
+
+// Use IMU heading to update x/y
+void update_odometry_with_heading(Pose *pose, int left_pulses, int right_pulses,
+                                  int pulses_per_rev, float wheel_radius, float wheel_base) {
+    // Convert encoder pulses to signed distance
+    float dL = signed_distance(left_pulses, pulses_per_rev, wheel_radius, 1);
+    float dR = signed_distance(right_pulses, pulses_per_rev, wheel_radius, 1);
+
+    float d = (dL + dR) / 2.0f; // average distance
+
+    // Read IMU for heading
+    float heading_deg, roll, pitch;
+    imu_read(&heading_deg, &roll, &pitch);
+    float heading_rad = heading_deg * M_PI / 180.0f;
+
+    // Update robot pose
+    pose->x += d * cosf(heading_rad);
+    pose->y += d * sinf(heading_rad);
+    pose->theta = heading_rad; // store in radians
+}
+
+// === ODOMETRY VARIABLES ===
+Pose robot_pose = {0.0f, 0.0f, 0.0f};    // x, y, theta
+int left_pulses  = 0;
+int right_pulses = 0;
+
+// === ROBOT CONSTANTS — SET THESE CORRECTLY ===
+#define WHEEL_RADIUS 0.03f     // (example: 3 cm)
+#define WHEEL_BASE   0.15f     // (example: 15 cm)
+#define PULSES_PER_REV 20      // your encoder resolution
+
 // === SETTINGS ===
 #define TURN_SPEED_PERCENT 35
 #define MOVE_SPEED_PERCENT 80
@@ -131,49 +169,41 @@ static bool execute_right_turn() {
 // DRIFT-CORRECTED
 // =========================
 static bool execute_forward() {
-    printf("\n=== FORWARD (CONTINUOUS, DRIFT-CORRECTED) ===\n");
-
-    drift_correction_start();
-    // motors_set_speed(MOVE_SPEED_PERCENT);
     motors_forward();
+    while (true) {
+        if (encoder_check_pulse(LEFT_ENCODER_PIN))  left_pulses++;
+        if (encoder_check_pulse(RIGHT_ENCODER_PIN)) right_pulses++;
 
-    uint32_t left_count = 0;
-    uint32_t right_count = 0;
+        update_odometry_with_heading(&robot_pose, left_pulses, right_pulses,
+                                     PULSES_PER_REV, WHEEL_RADIUS, WHEEL_BASE);
 
+        left_pulses = 0;
+        right_pulses = 0;
 
-    // // Optional: pulse counts for debugging
-    // if (encoder_check_pulse(LEFT_ENCODER_PIN))  left_count++;
-    // if (encoder_check_pulse(RIGHT_ENCODER_PIN)) right_count++;
-
-    // Keep wheels matched
-    drift_correction_update();
-
-
-
-    sleep_ms(1);
-
+        drift_correction_update();
+        sleep_ms(10);
+    }
     return true;
 }
 
-// =========================
-// BACKWARD (NO DRIFT CORR)
-// =========================
 static bool execute_backward() {
-    printf("\n=== BACKWARD (CONTINUOUS MOVEMENT) ===\n");
-
-    // motors_set_speed(MOVE_SPEED_PERCENT);
     motors_backward();
+    while (true) {
+        if (encoder_check_pulse(LEFT_ENCODER_PIN))  left_pulses++;
+        if (encoder_check_pulse(RIGHT_ENCODER_PIN)) right_pulses++;
 
-    uint32_t left_count = 0;
-    uint32_t right_count = 0;
+        // backward = negative distance
+        update_odometry_with_heading(&robot_pose, -left_pulses, -right_pulses,
+                                     PULSES_PER_REV, WHEEL_RADIUS, WHEEL_BASE);
 
-    if (encoder_check_pulse(LEFT_ENCODER_PIN))  left_count++;
-    if (encoder_check_pulse(RIGHT_ENCODER_PIN)) right_count++;
-    sleep_ms(10);
+        left_pulses = 0;
+        right_pulses = 0;
 
-
+        sleep_ms(10);
+    }
     return true;
 }
+
 
 // =========================
 // MAIN
@@ -203,6 +233,10 @@ int main() {
     char msg_buffer[UART_MAX_MESSAGE_LEN];
 
 while (true) {
+    // Collect encoder pulses
+        if (encoder_check_pulse(LEFT_ENCODER_PIN))  left_pulses++;
+        if (encoder_check_pulse(RIGHT_ENCODER_PIN)) right_pulses++;
+
         // --- Loop Start Trace ---
         printf("\n[DEBUG] --- Start Loop Iteration ---\n"); 
         
@@ -292,6 +326,26 @@ while (true) {
 
         // --- Loop End Trace ---
         printf("[DEBUG] Finished command processing.\n");
+
+        // === UPDATE ODOMETRY ===
+        // Only update odometry for forward/backward commands
+        switch (command) {
+            case 'w': case 'W':
+                execute_forward();
+                break;
+            case 's': case 'S':
+                execute_backward();
+                break;
+        }
+
+        // After each loop iteration, print position
+        printf("POS => X: %.3f  Y: %.3f  THETA: %.2f°\n",
+            robot_pose.x,
+            robot_pose.y,
+            robot_pose.theta * (180.0f / M_PI));
+
+
+
         sleep_ms(10);
         printf("[DEBUG] Sleeping for 10ms.\n");
     }

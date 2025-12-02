@@ -1,4 +1,10 @@
 #include "encoder.h"
+#include <math.h>
+
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846f
+#endif
 
 // Prepare the specific pin to listen for wheel movement
 void encoder_init(uint32_t encoder_pin) {
@@ -41,4 +47,32 @@ float calculate_rpm(uint32_t pulses, uint32_t pulses_per_rev, float interval_sec
     float revolutions = (float)pulses / pulses_per_rev;
     float revolutions_per_sec = revolutions / interval_sec;
     return revolutions_per_sec * 60.0f;
+}
+
+float distance_from_pulses(int pulses, int pulses_per_rev, float wheel_radius) {
+    float rev = (float)pulses / pulses_per_rev;
+    return rev * 2.0f * M_PI * wheel_radius;  // meters
+}
+
+
+void update_odometry(
+    Pose *pose,
+    int pulses_left,
+    int pulses_right,
+    int pulses_per_rev,
+    float wheel_radius,
+    float wheel_base
+) {
+    float dL = distance_from_pulses(pulses_left, pulses_per_rev, wheel_radius);
+    float dR = distance_from_pulses(pulses_right, pulses_per_rev, wheel_radius);
+
+    float d_center = (dR + dL) * 0.5f;
+    float d_theta  = (dR - dL) / wheel_base;
+
+    // Mid-point method
+    float theta_mid = pose->theta + d_theta * 0.5f;
+
+    pose->x     += d_center * cosf(theta_mid);
+    pose->y     += d_center * sinf(theta_mid);
+    pose->theta += d_theta;
 }
