@@ -1,5 +1,4 @@
 #include "encoder.h"
-#include <math.h>
 
 // ============================
 // ENCODER INITIALIZATION
@@ -49,42 +48,6 @@ bool encoder_check_pulse(uint32_t pin) {
 // ============================
 float calculate_rpm(uint32_t pulses, uint32_t pulses_per_rev, float interval_sec) {
     float revolutions = (float)pulses / pulses_per_rev;
-    float rps = revolutions / interval_sec;
-    return rps * 60.0f;
-}
-
-
-
-// ============================
-// PULSE → DISTANCE
-// ============================
-float distance_from_pulses(int pulses, int pulses_per_rev, float wheel_radius) {
-    float rev = (float)pulses / pulses_per_rev;
-    return rev * 2.0f * M_PI * wheel_radius;
-}
-
-
-
-// ============================
-// STANDARD ODOMETRY UPDATE
-// ============================
-void update_odometry(
-    Pose *pose,
-    int pulses_left,
-    int pulses_right,
-    int pulses_per_rev,
-    float wheel_radius,
-    float wheel_base
-) {
-    float dL = distance_from_pulses(pulses_left, pulses_per_rev, wheel_radius);
-    float dR = distance_from_pulses(pulses_right, pulses_per_rev, wheel_radius);
-
-    float d_center = 0.5f * (dL + dR);
-    float d_theta  = (dR - dL) / wheel_base;
-
-    float theta_mid = pose->theta + d_theta * 0.5f;
-
-    pose->x     += d_center * cosf(theta_mid);
-    pose->y     += d_center * sinf(theta_mid);
-    pose->theta += d_theta;
+    float revolutions_per_sec = revolutions / interval_sec;
+    return revolutions_per_sec * 60.0f;
 }
