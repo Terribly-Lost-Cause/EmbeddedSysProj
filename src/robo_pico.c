@@ -12,7 +12,7 @@
 
 // === SETTINGS ===
 #define TURN_SPEED_PERCENT 35
-#define MOVE_SPEED_PERCENT 30
+#define MOVE_SPEED_PERCENT 80
 #define TURN_TIMEOUT_MS 5000
 #define SETTLE_TIME_MS 200
 
@@ -31,7 +31,7 @@ static float get_angle_diff(float start, float current) {
 static void reset_turn_state() {
     motors_stop();
     sleep_ms(50);
-    motors_set_speed(TURN_SPEED_PERCENT);
+    // motors_set_speed(TURN_SPEED_PERCENT);
 
     encoder_init(LEFT_ENCODER_PIN);
     encoder_init(RIGHT_ENCODER_PIN);
@@ -43,6 +43,8 @@ static void reset_turn_state() {
     }
 
     sleep_ms(SETTLE_TIME_MS);
+
+    
 }
 
 // =========================
@@ -54,13 +56,16 @@ static bool execute_left_turn() {
     float start_heading, roll, pitch;
     imu_read(&start_heading, &roll, &pitch);
 
-    motors_set_speed(TURN_SPEED_PERCENT);
+    // motors_set_speed(TURN_SPEED_PERCENT);
     motors_left();
 
     int pulse_count = 0;
     uint32_t start_time = to_ms_since_boot(get_absolute_time());
     float current_heading = start_heading;
     float turned_so_far = 0.0f;
+
+    
+    printf("Start Turn\n");
 
     while (turned_so_far < TARGET_TURN_ANGLE) {
         imu_read(&current_heading, &roll, &pitch);
@@ -75,7 +80,11 @@ static bool execute_left_turn() {
         }
     }
 
+    
+
     motors_stop();
+
+    
     reset_turn_state();
     return true;
 }
@@ -86,13 +95,15 @@ static bool execute_right_turn() {
     float start_heading, roll, pitch;
     imu_read(&start_heading, &roll, &pitch);
 
-    motors_set_speed(TURN_SPEED_PERCENT);
+    // motors_set_speed(TURN_SPEED_PERCENT);
     motors_right();
 
     int pulse_count = 0;
     uint32_t start_time = to_ms_since_boot(get_absolute_time());
     float current_heading = start_heading;
     float turned_so_far = 0.0f;
+
+    printf("Start Turn\n");
 
     while (turned_so_far < TARGET_TURN_ANGLE) {
         imu_read(&current_heading, &roll, &pitch);
@@ -107,8 +118,11 @@ static bool execute_right_turn() {
         }
     }
 
+    
     motors_stop();
+
     reset_turn_state();
+
     return true;
 }
 
@@ -120,41 +134,23 @@ static bool execute_forward() {
     printf("\n=== FORWARD (CONTINUOUS, DRIFT-CORRECTED) ===\n");
 
     drift_correction_start();
-    motors_set_speed(MOVE_SPEED_PERCENT);
+    // motors_set_speed(MOVE_SPEED_PERCENT);
     motors_forward();
 
     uint32_t left_count = 0;
     uint32_t right_count = 0;
 
-    while (true) {
 
-        // Optional: pulse counts for debugging
-        if (encoder_check_pulse(LEFT_ENCODER_PIN))  left_count++;
-        if (encoder_check_pulse(RIGHT_ENCODER_PIN)) right_count++;
+    // // Optional: pulse counts for debugging
+    // if (encoder_check_pulse(LEFT_ENCODER_PIN))  left_count++;
+    // if (encoder_check_pulse(RIGHT_ENCODER_PIN)) right_count++;
 
-        // Keep wheels matched
-        drift_correction_update();
+    // Keep wheels matched
+    drift_correction_update();
 
-        // Read new user commands
-        int ch = getchar_timeout_us(0);
 
-        if (ch == 's' || ch == 'S' ||   // backward
-            ch == 'a' || ch == 'A' ||   // turn right
-            ch == 'd' || ch == 'D' ||   // turn left
-            ch == 'q' || ch == 'Q') {   // quit
 
-            printf("Stopping forward because of command.\n");
-            motors_stop();
-            drift_correction_stop();
-            break;
-        }
-
-        // IMPORTANT:
-        // 'w' or 'W' should NOT stop forward drive.
-        // That means: forward continues if user keeps sending 'w'.
-
-        sleep_ms(10);
-    }
+    sleep_ms(1);
 
     return true;
 }
@@ -165,36 +161,16 @@ static bool execute_forward() {
 static bool execute_backward() {
     printf("\n=== BACKWARD (CONTINUOUS MOVEMENT) ===\n");
 
-    motors_set_speed(MOVE_SPEED_PERCENT);
+    // motors_set_speed(MOVE_SPEED_PERCENT);
     motors_backward();
 
     uint32_t left_count = 0;
     uint32_t right_count = 0;
 
-    while (true) {
+    if (encoder_check_pulse(LEFT_ENCODER_PIN))  left_count++;
+    if (encoder_check_pulse(RIGHT_ENCODER_PIN)) right_count++;
+    sleep_ms(10);
 
-        // Optional debug pulses
-        if (encoder_check_pulse(LEFT_ENCODER_PIN))  left_count++;
-        if (encoder_check_pulse(RIGHT_ENCODER_PIN)) right_count++;
-
-        // Stop backward ONLY when a *different* command arrives
-        int ch = getchar_timeout_us(0);
-
-        if (ch == 'w' || ch == 'W' ||   // forward
-            ch == 'a' || ch == 'A' ||   // right turn
-            ch == 'd' || ch == 'D' ||   // left turn
-            ch == 'q' || ch == 'Q') {   // quit
-
-            printf("Stopping backward because of command.\n");
-            motors_stop();
-            break;
-        }
-
-        // IMPORTANT: s/S SHOULD NOT STOP BACKWARD
-        // If ch == 's', we simply ignore it and continue moving backward.
-
-        sleep_ms(10);
-    }
 
     return true;
 }
@@ -219,53 +195,106 @@ int main() {
     imu_init();
 
     uart_comm_init();
+
+    sleep_ms(1000);
+    
     printf("Waiting for commands...\n");
 
     char msg_buffer[UART_MAX_MESSAGE_LEN];
 
-    while (true) {
+while (true) {
+        // --- Loop Start Trace ---
+        printf("\n[DEBUG] --- Start Loop Iteration ---\n"); 
+        
         uart_comm_process();
+        printf("[DEBUG] UART communication process completed.\n");
 
         char command = 0;
         bool from_uart = false;
 
-        if (uart_receive_message(msg_buffer, UART_MAX_MESSAGE_LEN)) {
+        // --- UART Receive Loop Trace ---
+        while (uart_receive_message(msg_buffer, UART_MAX_MESSAGE_LEN)) {
+            printf("[DEBUG] Message received: '%s'\n", msg_buffer);
             if (strlen(msg_buffer) > 0) {
                 command = msg_buffer[0];
                 from_uart = true;
+                printf("[DEBUG] Command extracted: '%c'. from_uart = true.\n", command);
             }
         }
+        
+        // --- Command Execution Trace ---
+        if (command == 0) {
+             printf("[DEBUG] No new command received. Executing default switch case.\n");
+        } else {
+             printf("[DEBUG] Entering switch statement with command: '%c'\n", command);
+        }
 
-        int ch = getchar_timeout_us(0);
-        if (ch != PICO_ERROR_TIMEOUT && !command)
-            command = (char)ch;
+        switch (command) {
+            // --- Movement Commands (W, S, A, D) ---
+            case 'w':
+            case 'W':
+                execute_forward();
+                printf("[DEBUG] Executed: execute_forward()\n");
+                break;
 
-        if (command) {
+            case 's':
+            case 'S':
+                execute_backward();
+                printf("[DEBUG] Executed: execute_backward()\n");
+                break;
 
-            if (command == 'w' || command == 'W') execute_forward();
-            else if (command == 's' || command == 'S') execute_backward();
-            else if (command == 'a' || command == 'A') execute_right_turn();
-            else if (command == 'd' || command == 'D') execute_left_turn();
-            else if (command == 'h' || command == 'H') {
+            case 'a':
+            case 'A':
+                execute_right_turn();
+
+                printf("End Turn\n");
+                uart_send_string("done");
+                printf("Send done!\n");
+                sleep_ms(1000);
+
+                printf("[DEBUG] Executed: execute_right_turn()\n");
+                break;
+
+            case 'd':
+            case 'D':
+                execute_left_turn();
+
+                uart_send_string("done");
+                printf("Send done!\n");
+                sleep_ms(1000);
+
+                printf("[DEBUG] Executed: execute_left_turn()\n");
+                break;
+
+            // --- Sensor/Heading Command (H) ---
+            case 'h':
+            case 'H': {
                 float h, r, p;
                 imu_read(&h, &r, &p);
+                printf("[DEBUG] Executed: imu_read()\n");
                 printf("Heading: %.1f\n", h);
-            }
-            else if (command == 'q' || command == 'Q') {
-                motors_stop();
-                printf("Shutting down...\n");
                 break;
             }
 
-            if (from_uart &&
-               (command=='w'||command=='W'||command=='s'||command=='S'||
-                command=='a'||command=='A'||command=='d'||command=='D')) {
-                uart_send_string("done");
-            }
+            // --- Quit Command (Q) ---
+            case 'q':
+            case 'Q':
+                motors_stop();
+                printf("[DEBUG] Executed: motors_stop()\n");
+                printf("Shutting down...\n");
+                break;
+
+            // --- Default/Unknown Command ---
+            default:
+                printf("No Commands!\n");
+                break;
         }
 
+        // --- Loop End Trace ---
+        printf("[DEBUG] Finished command processing.\n");
         sleep_ms(10);
+        printf("[DEBUG] Sleeping for 10ms.\n");
     }
-
+    
     return 0;
 }
