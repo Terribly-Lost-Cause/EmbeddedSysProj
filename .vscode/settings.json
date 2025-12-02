@@ -3,7 +3,9 @@
         "stdlib.h": "c",
         "encoder.h": "c",
         "imu.h": "c",
-        "math.h": "c"
+        "math.h": "c",
+        "uart_comm.h": "c",
+        "drift_correction.h": "c"
     },
 
     "files.exclude": {

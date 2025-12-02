@@ -16,34 +16,21 @@
 
 // --- List of Tools Available to Use ---
 
-// Turn on the communication system (Must run this first!)
 void uart_comm_init(void);
 
-
 // --- Sending Data ---
-
-// Send just one letter (adds a "new line" automatically)
 void uart_send_char(char c);
-
-// Send a full word or sentence (adds a "new line" automatically)
 void uart_send_string(const char *str);
-
-// Send raw data exactly as is, without adding a "new line"
 void uart_send_raw(const char *data, size_t len);
 
-
 // --- Receiving Data ---
-
-// Check if a full message has arrived and copy it to your variable
-// Returns 'true' if it found a message, 'false' if the mailbox is empty
 bool uart_receive_message(char *buffer, size_t max_len);
-
-// The background worker: You must call this inside your main loop
-// It grabs data from the wires and pieces it together into messages
 void uart_comm_process(void);
-
-// Peek to see if a message is waiting (returns true/false)
-// Useful if you want to know if data exists without reading it yet
 bool uart_has_message(void);
+
+// --------------------------------------
+// ADDED: Required by robo_pico.c
+// --------------------------------------
+char uart_comm_read_char(void);
 
 #endif // UART_COMM_H

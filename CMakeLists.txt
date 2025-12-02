@@ -113,3 +113,45 @@ target_link_libraries(main
 pico_enable_stdio_usb(main 1)
 pico_enable_stdio_uart(main 0)
 pico_add_extra_outputs(main)
+
+# ==============================================================================
+# TARGET 6: lidar_uart_test — LIDAR Pico UART Sender Test
+# ==============================================================================
+add_executable(lidar_uart_test
+    src/lidar_uart_test.c
+    src/uart_comm.c
+)
+
+target_include_directories(lidar_uart_test PRIVATE ${PROJ_INCLUDE_DIRS})
+
+target_link_libraries(lidar_uart_test
+    pico_stdlib
+    hardware_pio
+    hardware_gpio
+    hardware_uart
+)
+
+pico_enable_stdio_usb(lidar_uart_test 1)
+pico_enable_stdio_uart(lidar_uart_test 0)
+pico_add_extra_outputs(lidar_uart_test)
+
+# ==============================================================================
+# TARGET 7: robo_uart_test — Robo Pico UART Receiver Test
+# ==============================================================================
+add_executable(robo_uart_test
+    src/robo_uart_test.c
+    src/uart_comm.c
+)
+
+target_include_directories(robo_uart_test PRIVATE ${PROJ_INCLUDE_DIRS})
+
+target_link_libraries(robo_uart_test
+    pico_stdlib
+    hardware_pio
+    hardware_gpio
+    hardware_uart
+)
+
+pico_enable_stdio_usb(robo_uart_test 1)
+pico_enable_stdio_uart(robo_uart_test 0)
+pico_add_extra_outputs(robo_uart_test)

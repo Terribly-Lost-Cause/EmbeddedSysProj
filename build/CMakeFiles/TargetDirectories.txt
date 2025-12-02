@@ -2,6 +2,8 @@ C:/Users/Macab/Downloads/EmbeddedSysProj/build/CMakeFiles/robo_pico.dir
 C:/Users/Macab/Downloads/EmbeddedSysProj/build/CMakeFiles/maker_pi_pico.dir
 C:/Users/Macab/Downloads/EmbeddedSysProj/build/CMakeFiles/auto_turn_test.dir
 C:/Users/Macab/Downloads/EmbeddedSysProj/build/CMakeFiles/main.dir
+C:/Users/Macab/Downloads/EmbeddedSysProj/build/CMakeFiles/lidar_uart_test.dir
+C:/Users/Macab/Downloads/EmbeddedSysProj/build/CMakeFiles/robo_uart_test.dir
 C:/Users/Macab/Downloads/EmbeddedSysProj/build/CMakeFiles/edit_cache.dir
 C:/Users/Macab/Downloads/EmbeddedSysProj/build/CMakeFiles/rebuild_cache.dir
 C:/Users/Macab/Downloads/EmbeddedSysProj/build/pico-sdk/CMakeFiles/edit_cache.dir

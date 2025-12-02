@@ -31,21 +31,21 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
  13 .comment      00000049  00000000  00000000  0000bce8  2**0
                   CONTENTS, READONLY
- 14 .debug_info   00026b3a  00000000  00000000  0000bd31  2**0
+ 14 .debug_info   00026b7b  00000000  00000000  0000bd31  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_abbrev 00006fe5  00000000  00000000  0003286b  2**0
+ 15 .debug_abbrev 00006ff6  00000000  00000000  000328ac  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_loc    0001965d  00000000  00000000  00039850  2**0
+ 16 .debug_loc    0001965d  00000000  00000000  000398a2  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_aranges 00001528  00000000  00000000  00052eb0  2**3
+ 17 .debug_aranges 00001530  00000000  00000000  00052f00  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_ranges 00004ff8  00000000  00000000  000543d8  2**3
+ 18 .debug_ranges 00005000  00000000  00000000  00054430  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_line   00018f06  00000000  00000000  000593d0  2**0
+ 19 .debug_line   00018f30  00000000  00000000  00059430  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_str    000076b9  00000000  00000000  000722d6  2**0
+ 20 .debug_str    000076cd  00000000  00000000  00072360  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_frame  00002bcc  00000000  00000000  00079990  2**2
+ 21 .debug_frame  00002be8  00000000  00000000  00079a30  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 C:/Users/Macab/Downloads/EmbeddedSysProj/build/maker_pi_pico.elf:     file format elf32-littlearm
@@ -7028,7 +7028,7 @@ Disassembly of section .text:
 10003c46:	2800      	cmp	r0, #0
 10003c48:	d000      	beq.n	10003c4c <divmod_s32s32_unsafe+0x24>
 10003c4a:	43c8      	mvns	r0, r1
-10003c4c:	f003 fc3c 	bl	100074c8 <____aeabi_idiv0_veneer>
+10003c4c:	f003 fc44 	bl	100074d8 <____aeabi_idiv0_veneer>
 10003c50:	2100      	movs	r1, #0
 10003c52:	bd04      	pop	{r2, pc}
 
@@ -7068,7 +7068,7 @@ Disassembly of section .text:
 10003c90:	d001      	beq.n	10003c96 <divmod_u32u32_unsafe+0x1e>
 10003c92:	2000      	movs	r0, #0
 10003c94:	43c0      	mvns	r0, r0
-10003c96:	f003 fc17 	bl	100074c8 <____aeabi_idiv0_veneer>
+10003c96:	f003 fc1f 	bl	100074d8 <____aeabi_idiv0_veneer>
 10003c9a:	2100      	movs	r1, #0
 10003c9c:	bd04      	pop	{r2, pc}
 10003c9e:	46c0      	nop			; (mov r8, r8)
@@ -9115,7 +9115,7 @@ Disassembly of section .text:
 10004b80:	2b00      	cmp	r3, #0
 10004b82:	db0d      	blt.n	10004ba0 <stdout_serialize_begin+0x38>
 10004b84:	480a      	ldr	r0, [pc, #40]	; (10004bb0 <stdout_serialize_begin+0x48>)
-10004b86:	f002 fcbf 	bl	10007508 <__mutex_try_enter_block_until_veneer>
+10004b86:	f002 fcc7 	bl	10007518 <__mutex_try_enter_block_until_veneer>
 10004b8a:	bd10      	pop	{r4, pc}
 10004b8c:	4b09      	ldr	r3, [pc, #36]	; (10004bb4 <stdout_serialize_begin+0x4c>)
 10004b8e:	4a0a      	ldr	r2, [pc, #40]	; (10004bb8 <stdout_serialize_begin+0x50>)
@@ -9508,7 +9508,7 @@ Disassembly of section .text:
 10004eaa:	b084      	sub	sp, #16
 10004eac:	2100      	movs	r1, #0
 10004eae:	482d      	ldr	r0, [pc, #180]	; (10004f64 <low_priority_worker_irq+0xbc>)
-10004eb0:	f002 fb12 	bl	100074d8 <__mutex_try_enter_veneer>
+10004eb0:	f002 fb1a 	bl	100074e8 <__mutex_try_enter_veneer>
 10004eb4:	2800      	cmp	r0, #0
 10004eb6:	d13a      	bne.n	10004f2e <low_priority_worker_irq+0x86>
 10004eb8:	4b2b      	ldr	r3, [pc, #172]	; (10004f68 <low_priority_worker_irq+0xc0>)
@@ -9751,7 +9751,7 @@ Disassembly of section .text:
 100050fa:	2b00      	cmp	r3, #0
 100050fc:	db23      	blt.n	10005146 <stdio_usb_in_chars+0x7a>
 100050fe:	481f      	ldr	r0, [pc, #124]	; (1000517c <stdio_usb_in_chars+0xb0>)
-10005100:	f002 fa02 	bl	10007508 <__mutex_try_enter_block_until_veneer>
+10005100:	f002 fa0a 	bl	10007518 <__mutex_try_enter_block_until_veneer>
 10005104:	2800      	cmp	r0, #0
 10005106:	d034      	beq.n	10005172 <stdio_usb_in_chars+0xa6>
 10005108:	f7ff ffda 	bl	100050c0 <stdio_usb_connected>
@@ -9829,7 +9829,7 @@ Disassembly of section .text:
 100051b0:	2b00      	cmp	r3, #0
 100051b2:	db11      	blt.n	100051d8 <stdio_usb_out_chars+0x48>
 100051b4:	4834      	ldr	r0, [pc, #208]	; (10005288 <stdio_usb_out_chars+0xf8>)
-100051b6:	f002 f9a7 	bl	10007508 <__mutex_try_enter_block_until_veneer>
+100051b6:	f002 f9af 	bl	10007518 <__mutex_try_enter_block_until_veneer>
 100051ba:	2800      	cmp	r0, #0
 100051bc:	d112      	bne.n	100051e4 <stdio_usb_out_chars+0x54>
 100051be:	bc80      	pop	{r7}
@@ -10282,7 +10282,7 @@ Disassembly of section .text:
 10005594:	2140      	movs	r1, #64	; 0x40
 10005596:	2080      	movs	r0, #128	; 0x80
 10005598:	f7ff ff62 	bl	10005460 <hw_endpoint_init>
-1000559c:	f001 ff74 	bl	10007488 <__reset_non_control_endpoints_veneer>
+1000559c:	f001 ffd4 	bl	10007548 <__reset_non_control_endpoints_veneer>
 100055a0:	2301      	movs	r3, #1
 100055a2:	642b      	str	r3, [r5, #64]	; 0x40
 100055a4:	2380      	movs	r3, #128	; 0x80
@@ -10355,7 +10355,7 @@ Disassembly of section .text:
 
 10005640 <dcd_edpt_close_all>:
 10005640:	b510      	push	{r4, lr}
-10005642:	f001 ff21 	bl	10007488 <__reset_non_control_endpoints_veneer>
+10005642:	f001 ff81 	bl	10007548 <__reset_non_control_endpoints_veneer>
 10005646:	bd10      	pop	{r4, pc}
 
 10005648 <dcd_edpt_xfer>:
@@ -10395,7 +10395,7 @@ Disassembly of section .text:
 10005694:	2280      	movs	r2, #128	; 0x80
 10005696:	0112      	lsls	r2, r2, #4
 10005698:	2100      	movs	r1, #0
-1000569a:	f001 ff55 	bl	10007548 <___hw_endpoint_buffer_control_update32_veneer>
+1000569a:	f001 ff5d 	bl	10007558 <___hw_endpoint_buffer_control_update32_veneer>
 1000569e:	bd10      	pop	{r4, pc}
 100056a0:	2201      	movs	r2, #1
 100056a2:	e7f3      	b.n	1000568c <dcd_edpt_stall+0x10>
@@ -10412,7 +10412,7 @@ Disassembly of section .text:
 100056b8:	70c3      	strb	r3, [r0, #3]
 100056ba:	2200      	movs	r2, #0
 100056bc:	4901      	ldr	r1, [pc, #4]	; (100056c4 <dcd_edpt_clear_stall+0x1c>)
-100056be:	f001 ff43 	bl	10007548 <___hw_endpoint_buffer_control_update32_veneer>
+100056be:	f001 ff4b 	bl	10007558 <___hw_endpoint_buffer_control_update32_veneer>
 100056c2:	e7f5      	b.n	100056b0 <dcd_edpt_clear_stall+0x8>
 100056c4:	fffff7ff 	.word	0xfffff7ff
 
@@ -10464,7 +10464,7 @@ Disassembly of section .text:
 1000572a:	76a3      	strb	r3, [r4, #26]
 1000572c:	6125      	str	r5, [r4, #16]
 1000572e:	0020      	movs	r0, r4
-10005730:	f001 ff02 	bl	10007538 <__e15_is_bulkin_ep_veneer>
+10005730:	f001 feaa 	bl	10007488 <__e15_is_bulkin_ep_veneer>
 10005734:	2800      	cmp	r0, #0
 10005736:	d004      	beq.n	10005742 <hw_endpoint_xfer_start+0x2e>
 10005738:	4a09      	ldr	r2, [pc, #36]	; (10005760 <hw_endpoint_xfer_start+0x4c>)
@@ -10473,16 +10473,16 @@ Disassembly of section .text:
 1000573e:	0289      	lsls	r1, r1, #10
 10005740:	50d1      	str	r1, [r2, r3]
 10005742:	0020      	movs	r0, r4
-10005744:	f001 ff08 	bl	10007558 <__e15_is_critical_frame_period_veneer>
+10005744:	f001 fec0 	bl	100074c8 <__e15_is_critical_frame_period_veneer>
 10005748:	2800      	cmp	r0, #0
 1000574a:	d005      	beq.n	10005758 <hw_endpoint_xfer_start+0x44>
 1000574c:	2301      	movs	r3, #1
 1000574e:	7723      	strb	r3, [r4, #28]
 10005750:	bd70      	pop	{r4, r5, r6, pc}
-10005752:	f001 fee9 	bl	10007528 <__hw_endpoint_reset_transfer_veneer>
+10005752:	f001 fef1 	bl	10007538 <__hw_endpoint_reset_transfer_veneer>
 10005756:	e7e4      	b.n	10005722 <hw_endpoint_xfer_start+0xe>
 10005758:	0020      	movs	r0, r4
-1000575a:	f001 fedd 	bl	10007518 <__hw_endpoint_start_next_buffer_veneer>
+1000575a:	f001 fee5 	bl	10007528 <__hw_endpoint_start_next_buffer_veneer>
 1000575e:	e7f7      	b.n	10005750 <hw_endpoint_xfer_start+0x3c>
 10005760:	50112000 	.word	0x50112000
 
@@ -10978,7 +10978,7 @@ Disassembly of section .text:
 10005b80:	9603      	str	r6, [sp, #12]
 10005b82:	0029      	movs	r1, r5
 10005b84:	0020      	movs	r0, r4
-10005b86:	f001 fcb7 	bl	100074f8 <__dcd_event_handler_veneer>
+10005b86:	f001 fcbf 	bl	10007508 <__dcd_event_handler_veneer>
 10005b8a:	b005      	add	sp, #20
 10005b8c:	bdf0      	pop	{r4, r5, r6, r7, pc}
 	...
@@ -12865,7 +12865,7 @@ Disassembly of section .text:
 10006b16:	2101      	movs	r1, #1
 10006b18:	4249      	negs	r1, r1
 10006b1a:	0028      	movs	r0, r5
-10006b1c:	f000 fce4 	bl	100074e8 <__mutex_enter_timeout_ms_veneer>
+10006b1c:	f000 fcec 	bl	100074f8 <__mutex_enter_timeout_ms_veneer>
 10006b20:	7823      	ldrb	r3, [r4, #0]
 10006b22:	07db      	lsls	r3, r3, #31
 10006b24:	d404      	bmi.n	10006b30 <tu_edpt_claim+0x30>
@@ -12897,7 +12897,7 @@ Disassembly of section .text:
 10006b56:	2101      	movs	r1, #1
 10006b58:	4249      	negs	r1, r1
 10006b5a:	0030      	movs	r0, r6
-10006b5c:	f000 fcc4 	bl	100074e8 <__mutex_enter_timeout_ms_veneer>
+10006b5c:	f000 fccc 	bl	100074f8 <__mutex_enter_timeout_ms_veneer>
 10006b60:	7823      	ldrb	r3, [r4, #0]
 10006b62:	075b      	lsls	r3, r3, #29
 10006b64:	d40b      	bmi.n	10006b7e <tu_edpt_release+0x2e>
@@ -13298,7 +13298,7 @@ Disassembly of section .text:
 10006e70:	d003      	beq.n	10006e7a <_tu_fifo_read_n+0x1a>
 10006e72:	2101      	movs	r1, #1
 10006e74:	4249      	negs	r1, r1
-10006e76:	f000 fb37 	bl	100074e8 <__mutex_enter_timeout_ms_veneer>
+10006e76:	f000 fb3f 	bl	100074f8 <__mutex_enter_timeout_ms_veneer>
 10006e7a:	8923      	ldrh	r3, [r4, #8]
 10006e7c:	b29b      	uxth	r3, r3
 10006e7e:	8962      	ldrh	r2, [r4, #10]
@@ -13500,7 +13500,7 @@ Disassembly of section .text:
 1000700e:	d003      	beq.n	10007018 <_tu_fifo_write_n+0x1e>
 10007010:	2101      	movs	r1, #1
 10007012:	4249      	negs	r1, r1
-10007014:	f000 fa68 	bl	100074e8 <__mutex_enter_timeout_ms_veneer>
+10007014:	f000 fa70 	bl	100074f8 <__mutex_enter_timeout_ms_veneer>
 10007018:	8934      	ldrh	r4, [r6, #8]
 1000701a:	b2a4      	uxth	r4, r4
 1000701c:	8971      	ldrh	r1, [r6, #10]
@@ -13621,13 +13621,13 @@ Disassembly of section .text:
 10007106:	d003      	beq.n	10007110 <tu_fifo_config+0x26>
 10007108:	2101      	movs	r1, #1
 1000710a:	4249      	negs	r1, r1
-1000710c:	f000 f9ec 	bl	100074e8 <__mutex_enter_timeout_ms_veneer>
+1000710c:	f000 f9f4 	bl	100074f8 <__mutex_enter_timeout_ms_veneer>
 10007110:	6920      	ldr	r0, [r4, #16]
 10007112:	2800      	cmp	r0, #0
 10007114:	d003      	beq.n	1000711e <tu_fifo_config+0x34>
 10007116:	2101      	movs	r1, #1
 10007118:	4249      	negs	r1, r1
-1000711a:	f000 f9e5 	bl	100074e8 <__mutex_enter_timeout_ms_veneer>
+1000711a:	f000 f9ed 	bl	100074f8 <__mutex_enter_timeout_ms_veneer>
 1000711e:	9b01      	ldr	r3, [sp, #4]
 10007120:	6023      	str	r3, [r4, #0]
 10007122:	80a6      	strh	r6, [r4, #4]
@@ -13751,7 +13751,7 @@ Disassembly of section .text:
 100071fe:	d003      	beq.n	10007208 <tu_fifo_read+0x14>
 10007200:	2101      	movs	r1, #1
 10007202:	4249      	negs	r1, r1
-10007204:	f000 f970 	bl	100074e8 <__mutex_enter_timeout_ms_veneer>
+10007204:	f000 f978 	bl	100074f8 <__mutex_enter_timeout_ms_veneer>
 10007208:	8922      	ldrh	r2, [r4, #8]
 1000720a:	b292      	uxth	r2, r2
 1000720c:	8963      	ldrh	r3, [r4, #10]
@@ -13788,7 +13788,7 @@ Disassembly of section .text:
 1000724a:	d003      	beq.n	10007254 <tu_fifo_write+0x14>
 1000724c:	2101      	movs	r1, #1
 1000724e:	4249      	negs	r1, r1
-10007250:	f000 f94a 	bl	100074e8 <__mutex_enter_timeout_ms_veneer>
+10007250:	f000 f952 	bl	100074f8 <__mutex_enter_timeout_ms_veneer>
 10007254:	8925      	ldrh	r5, [r4, #8]
 10007256:	b2ad      	uxth	r5, r5
 10007258:	0020      	movs	r0, r4
@@ -13840,13 +13840,13 @@ Disassembly of section .text:
 100072b6:	d003      	beq.n	100072c0 <tu_fifo_clear+0x12>
 100072b8:	2101      	movs	r1, #1
 100072ba:	4249      	negs	r1, r1
-100072bc:	f000 f914 	bl	100074e8 <__mutex_enter_timeout_ms_veneer>
+100072bc:	f000 f91c 	bl	100074f8 <__mutex_enter_timeout_ms_veneer>
 100072c0:	6920      	ldr	r0, [r4, #16]
 100072c2:	2800      	cmp	r0, #0
 100072c4:	d003      	beq.n	100072ce <tu_fifo_clear+0x20>
 100072c6:	2101      	movs	r1, #1
 100072c8:	4249      	negs	r1, r1
-100072ca:	f000 f90d 	bl	100074e8 <__mutex_enter_timeout_ms_veneer>
+100072ca:	f000 f915 	bl	100074f8 <__mutex_enter_timeout_ms_veneer>
 100072ce:	2300      	movs	r3, #0
 100072d0:	8163      	strh	r3, [r4, #10]
 100072d2:	8123      	strh	r3, [r4, #8]
@@ -13870,13 +13870,13 @@ Disassembly of section .text:
 100072f6:	d003      	beq.n	10007300 <tu_fifo_set_overwritable+0x14>
 100072f8:	2101      	movs	r1, #1
 100072fa:	4249      	negs	r1, r1
-100072fc:	f000 f8f4 	bl	100074e8 <__mutex_enter_timeout_ms_veneer>
+100072fc:	f000 f8fc 	bl	100074f8 <__mutex_enter_timeout_ms_veneer>
 10007300:	6920      	ldr	r0, [r4, #16]
 10007302:	2800      	cmp	r0, #0
 10007304:	d003      	beq.n	1000730e <tu_fifo_set_overwritable+0x22>
 10007306:	2101      	movs	r1, #1
 10007308:	4249      	negs	r1, r1
-1000730a:	f000 f8ed 	bl	100074e8 <__mutex_enter_timeout_ms_veneer>
+1000730a:	f000 f8f5 	bl	100074f8 <__mutex_enter_timeout_ms_veneer>
 1000730e:	01ed      	lsls	r5, r5, #7
 10007310:	79e3      	ldrb	r3, [r4, #7]
 10007312:	217f      	movs	r1, #127	; 0x7f
@@ -14068,14 +14068,14 @@ Disassembly of section .text:
 10007484:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
 10007486:	46c0      	nop			; (mov r8, r8)
 
-10007488 <__reset_non_control_endpoints_veneer>:
+10007488 <__e15_is_bulkin_ep_veneer>:
 10007488:	b401      	push	{r0}
-1000748a:	4802      	ldr	r0, [pc, #8]	; (10007494 <__reset_non_control_endpoints_veneer+0xc>)
+1000748a:	4802      	ldr	r0, [pc, #8]	; (10007494 <__e15_is_bulkin_ep_veneer+0xc>)
 1000748c:	4684      	mov	ip, r0
 1000748e:	bc01      	pop	{r0}
 10007490:	4760      	bx	ip
 10007492:	bf00      	nop
-10007494:	200003bd 	.word	0x200003bd
+10007494:	2000066d 	.word	0x2000066d
 
 10007498 <__flash_do_cmd_veneer>:
 10007498:	b401      	push	{r0}
@@ -14104,95 +14104,95 @@ Disassembly of section .text:
 100074c2:	bf00      	nop
 100074c4:	20000b1d 	.word	0x20000b1d
 
-100074c8 <____aeabi_idiv0_veneer>:
+100074c8 <__e15_is_critical_frame_period_veneer>:
 100074c8:	b401      	push	{r0}
-100074ca:	4802      	ldr	r0, [pc, #8]	; (100074d4 <____aeabi_idiv0_veneer+0xc>)
+100074ca:	4802      	ldr	r0, [pc, #8]	; (100074d4 <__e15_is_critical_frame_period_veneer+0xc>)
 100074cc:	4684      	mov	ip, r0
 100074ce:	bc01      	pop	{r0}
 100074d0:	4760      	bx	ip
 100074d2:	bf00      	nop
-100074d4:	20000b1d 	.word	0x20000b1d
+100074d4:	20000699 	.word	0x20000699
 
-100074d8 <__mutex_try_enter_veneer>:
+100074d8 <____aeabi_idiv0_veneer>:
 100074d8:	b401      	push	{r0}
-100074da:	4802      	ldr	r0, [pc, #8]	; (100074e4 <__mutex_try_enter_veneer+0xc>)
+100074da:	4802      	ldr	r0, [pc, #8]	; (100074e4 <____aeabi_idiv0_veneer+0xc>)
 100074dc:	4684      	mov	ip, r0
 100074de:	bc01      	pop	{r0}
 100074e0:	4760      	bx	ip
 100074e2:	bf00      	nop
-100074e4:	200000c1 	.word	0x200000c1
+100074e4:	20000b1d 	.word	0x20000b1d
 
-100074e8 <__mutex_enter_timeout_ms_veneer>:
+100074e8 <__mutex_try_enter_veneer>:
 100074e8:	b401      	push	{r0}
-100074ea:	4802      	ldr	r0, [pc, #8]	; (100074f4 <__mutex_enter_timeout_ms_veneer+0xc>)
+100074ea:	4802      	ldr	r0, [pc, #8]	; (100074f4 <__mutex_try_enter_veneer+0xc>)
 100074ec:	4684      	mov	ip, r0
 100074ee:	bc01      	pop	{r0}
 100074f0:	4760      	bx	ip
 100074f2:	bf00      	nop
-100074f4:	200001c9 	.word	0x200001c9
+100074f4:	200000c1 	.word	0x200000c1
 
-100074f8 <__dcd_event_handler_veneer>:
+100074f8 <__mutex_enter_timeout_ms_veneer>:
 100074f8:	b401      	push	{r0}
-100074fa:	4802      	ldr	r0, [pc, #8]	; (10007504 <__dcd_event_handler_veneer+0xc>)
+100074fa:	4802      	ldr	r0, [pc, #8]	; (10007504 <__mutex_enter_timeout_ms_veneer+0xc>)
 100074fc:	4684      	mov	ip, r0
 100074fe:	bc01      	pop	{r0}
 10007500:	4760      	bx	ip
 10007502:	bf00      	nop
-10007504:	2000091d 	.word	0x2000091d
+10007504:	200001c9 	.word	0x200001c9
 
-10007508 <__mutex_try_enter_block_until_veneer>:
+10007508 <__dcd_event_handler_veneer>:
 10007508:	b401      	push	{r0}
-1000750a:	4802      	ldr	r0, [pc, #8]	; (10007514 <__mutex_try_enter_block_until_veneer+0xc>)
+1000750a:	4802      	ldr	r0, [pc, #8]	; (10007514 <__dcd_event_handler_veneer+0xc>)
 1000750c:	4684      	mov	ip, r0
 1000750e:	bc01      	pop	{r0}
 10007510:	4760      	bx	ip
 10007512:	bf00      	nop
-10007514:	20000195 	.word	0x20000195
+10007514:	2000091d 	.word	0x2000091d
 
-10007518 <__hw_endpoint_start_next_buffer_veneer>:
+10007518 <__mutex_try_enter_block_until_veneer>:
 10007518:	b401      	push	{r0}
-1000751a:	4802      	ldr	r0, [pc, #8]	; (10007524 <__hw_endpoint_start_next_buffer_veneer+0xc>)
+1000751a:	4802      	ldr	r0, [pc, #8]	; (10007524 <__mutex_try_enter_block_until_veneer+0xc>)
 1000751c:	4684      	mov	ip, r0
 1000751e:	bc01      	pop	{r0}
 10007520:	4760      	bx	ip
 10007522:	bf00      	nop
-10007524:	20000845 	.word	0x20000845
+10007524:	20000195 	.word	0x20000195
 
-10007528 <__hw_endpoint_reset_transfer_veneer>:
+10007528 <__hw_endpoint_start_next_buffer_veneer>:
 10007528:	b401      	push	{r0}
-1000752a:	4802      	ldr	r0, [pc, #8]	; (10007534 <__hw_endpoint_reset_transfer_veneer+0xc>)
+1000752a:	4802      	ldr	r0, [pc, #8]	; (10007534 <__hw_endpoint_start_next_buffer_veneer+0xc>)
 1000752c:	4684      	mov	ip, r0
 1000752e:	bc01      	pop	{r0}
 10007530:	4760      	bx	ip
 10007532:	bf00      	nop
-10007534:	200007e1 	.word	0x200007e1
+10007534:	20000845 	.word	0x20000845
 
-10007538 <__e15_is_bulkin_ep_veneer>:
+10007538 <__hw_endpoint_reset_transfer_veneer>:
 10007538:	b401      	push	{r0}
-1000753a:	4802      	ldr	r0, [pc, #8]	; (10007544 <__e15_is_bulkin_ep_veneer+0xc>)
+1000753a:	4802      	ldr	r0, [pc, #8]	; (10007544 <__hw_endpoint_reset_transfer_veneer+0xc>)
 1000753c:	4684      	mov	ip, r0
 1000753e:	bc01      	pop	{r0}
 10007540:	4760      	bx	ip
 10007542:	bf00      	nop
-10007544:	2000066d 	.word	0x2000066d
+10007544:	200007e1 	.word	0x200007e1
 
-10007548 <___hw_endpoint_buffer_control_update32_veneer>:
+10007548 <__reset_non_control_endpoints_veneer>:
 10007548:	b401      	push	{r0}
-1000754a:	4802      	ldr	r0, [pc, #8]	; (10007554 <___hw_endpoint_buffer_control_update32_veneer+0xc>)
+1000754a:	4802      	ldr	r0, [pc, #8]	; (10007554 <__reset_non_control_endpoints_veneer+0xc>)
 1000754c:	4684      	mov	ip, r0
 1000754e:	bc01      	pop	{r0}
 10007550:	4760      	bx	ip
 10007552:	bf00      	nop
-10007554:	200007ed 	.word	0x200007ed
+10007554:	200003bd 	.word	0x200003bd
 
-10007558 <__e15_is_critical_frame_period_veneer>:
+10007558 <___hw_endpoint_buffer_control_update32_veneer>:
 10007558:	b401      	push	{r0}
-1000755a:	4802      	ldr	r0, [pc, #8]	; (10007564 <__e15_is_critical_frame_period_veneer+0xc>)
+1000755a:	4802      	ldr	r0, [pc, #8]	; (10007564 <___hw_endpoint_buffer_control_update32_veneer+0xc>)
 1000755c:	4684      	mov	ip, r0
 1000755e:	bc01      	pop	{r0}
 10007560:	4760      	bx	ip
 10007562:	bf00      	nop
-10007564:	20000699 	.word	0x20000699
+10007564:	200007ed 	.word	0x200007ed
 
 Disassembly of section .data:
 
@@ -14264,7 +14264,7 @@ Disassembly of section .data:
 2000014a:	f38c 8810 	msr	PRIMASK, ip
 2000014e:	0038      	movs	r0, r7
 20000150:	4641      	mov	r1, r8
-20000152:	f000 fd1d 	bl	20000b90 <__best_effort_wfe_or_timeout_veneer>
+20000152:	f000 fcf5 	bl	20000b40 <__best_effort_wfe_or_timeout_veneer>
 20000156:	2800      	cmp	r0, #0
 20000158:	d0e5      	beq.n	20000126 <mutex_enter_block_until+0x1e>
 2000015a:	2000      	movs	r0, #0
@@ -14321,7 +14321,7 @@ Disassembly of section .data:
 200001c8:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
 200001ca:	0006      	movs	r6, r0
 200001cc:	000f      	movs	r7, r1
-200001ce:	f000 fcaf 	bl	20000b30 <__time_us_64_veneer>
+200001ce:	f000 fcdf 	bl	20000b90 <__time_us_64_veneer>
 200001d2:	0004      	movs	r4, r0
 200001d4:	1e0d      	subs	r5, r1, #0
 200001d6:	db12      	blt.n	200001fe <mutex_enter_timeout_ms+0x36>
@@ -14330,7 +14330,7 @@ Disassembly of section .data:
 200001dc:	2300      	movs	r3, #0
 200001de:	0038      	movs	r0, r7
 200001e0:	2100      	movs	r1, #0
-200001e2:	f000 fcad 	bl	20000b40 <____wrap___aeabi_lmul_veneer>
+200001e2:	f000 fcb5 	bl	20000b50 <____wrap___aeabi_lmul_veneer>
 200001e6:	0022      	movs	r2, r4
 200001e8:	002b      	movs	r3, r5
 200001ea:	1812      	adds	r2, r2, r0
@@ -14565,7 +14565,7 @@ Disassembly of section .data:
 200003da:	0092      	lsls	r2, r2, #2
 200003dc:	2100      	movs	r1, #0
 200003de:	4804      	ldr	r0, [pc, #16]	; (200003f0 <reset_non_control_endpoints+0x34>)
-200003e0:	f000 fb9e 	bl	20000b20 <____wrap_memset_veneer>
+200003e0:	f000 fba6 	bl	20000b30 <____wrap_memset_veneer>
 200003e4:	4b03      	ldr	r3, [pc, #12]	; (200003f4 <reset_non_control_endpoints+0x38>)
 200003e6:	4a04      	ldr	r2, [pc, #16]	; (200003f8 <reset_non_control_endpoints+0x3c>)
 200003e8:	601a      	str	r2, [r3, #0]
@@ -14628,7 +14628,7 @@ Disassembly of section .data:
 20000460:	220c      	movs	r2, #12
 20000462:	2100      	movs	r1, #0
 20000464:	a801      	add	r0, sp, #4
-20000466:	f000 fb5b 	bl	20000b20 <____wrap_memset_veneer>
+20000466:	f000 fb63 	bl	20000b30 <____wrap_memset_veneer>
 2000046a:	2307      	movs	r3, #7
 2000046c:	466a      	mov	r2, sp
 2000046e:	7153      	strb	r3, [r2, #5]
@@ -14724,7 +14724,7 @@ Disassembly of section .data:
 2000052a:	220c      	movs	r2, #12
 2000052c:	2100      	movs	r1, #0
 2000052e:	a801      	add	r0, sp, #4
-20000530:	f000 faf6 	bl	20000b20 <____wrap_memset_veneer>
+20000530:	f000 fafe 	bl	20000b30 <____wrap_memset_veneer>
 20000534:	2300      	movs	r3, #0
 20000536:	466a      	mov	r2, sp
 20000538:	7113      	strb	r3, [r2, #4]
@@ -14764,7 +14764,7 @@ Disassembly of section .data:
 20000582:	220c      	movs	r2, #12
 20000584:	2100      	movs	r1, #0
 20000586:	0030      	movs	r0, r6
-20000588:	f000 faca 	bl	20000b20 <____wrap_memset_veneer>
+20000588:	f000 fad2 	bl	20000b30 <____wrap_memset_veneer>
 2000058c:	2306      	movs	r3, #6
 2000058e:	7073      	strb	r3, [r6, #1]
 20000590:	4a34      	ldr	r2, [pc, #208]	; (20000664 <dcd_rp2040_irq+0x1c4>)
@@ -14799,7 +14799,7 @@ Disassembly of section .data:
 200005ce:	220c      	movs	r2, #12
 200005d0:	2100      	movs	r1, #0
 200005d2:	0030      	movs	r0, r6
-200005d4:	f000 faa4 	bl	20000b20 <____wrap_memset_veneer>
+200005d4:	f000 faac 	bl	20000b30 <____wrap_memset_veneer>
 200005d8:	2301      	movs	r3, #1
 200005da:	7073      	strb	r3, [r6, #1]
 200005dc:	2101      	movs	r1, #1
@@ -14817,7 +14817,7 @@ Disassembly of section .data:
 200005f6:	220c      	movs	r2, #12
 200005f8:	2100      	movs	r1, #0
 200005fa:	0030      	movs	r0, r6
-200005fc:	f000 fa90 	bl	20000b20 <____wrap_memset_veneer>
+200005fc:	f000 fa98 	bl	20000b30 <____wrap_memset_veneer>
 20000600:	2304      	movs	r3, #4
 20000602:	7073      	strb	r3, [r6, #1]
 20000604:	2101      	movs	r1, #1
@@ -14834,7 +14834,7 @@ Disassembly of section .data:
 2000061c:	220c      	movs	r2, #12
 2000061e:	2100      	movs	r1, #0
 20000620:	0030      	movs	r0, r6
-20000622:	f000 fa7d 	bl	20000b20 <____wrap_memset_veneer>
+20000622:	f000 fa85 	bl	20000b30 <____wrap_memset_veneer>
 20000626:	2305      	movs	r3, #5
 20000628:	7073      	strb	r3, [r6, #1]
 2000062a:	2101      	movs	r1, #1
@@ -14848,7 +14848,7 @@ Disassembly of section .data:
 2000063c:	0021      	movs	r1, r4
 2000063e:	4069      	eors	r1, r5
 20000640:	4809      	ldr	r0, [pc, #36]	; (20000668 <dcd_rp2040_irq+0x1c8>)
-20000642:	f000 fa9d 	bl	20000b80 <__panic_veneer>
+20000642:	f000 fa95 	bl	20000b70 <__panic_veneer>
 20000646:	46c0      	nop			; (mov r8, r8)
 20000648:	50110000 	.word	0x50110000
 2000064c:	40054000 	.word	0x40054000
@@ -14952,7 +14952,7 @@ Disassembly of section .data:
 2000071e:	4460      	add	r0, ip
 20000720:	0032      	movs	r2, r6
 20000722:	6921      	ldr	r1, [r4, #16]
-20000724:	f000 fa24 	bl	20000b70 <____wrap_memcpy_veneer>
+20000724:	f000 f9fc 	bl	20000b20 <____wrap_memcpy_veneer>
 20000728:	6923      	ldr	r3, [r4, #16]
 2000072a:	469c      	mov	ip, r3
 2000072c:	4466      	add	r6, ip
@@ -15001,7 +15001,7 @@ Disassembly of section .data:
 20000780:	4461      	add	r1, ip
 20000782:	002a      	movs	r2, r5
 20000784:	6920      	ldr	r0, [r4, #16]
-20000786:	f000 f9f3 	bl	20000b70 <____wrap_memcpy_veneer>
+20000786:	f000 f9cb 	bl	20000b20 <____wrap_memcpy_veneer>
 2000078a:	8ae3      	ldrh	r3, [r4, #22]
 2000078c:	195b      	adds	r3, r3, r5
 2000078e:	82e3      	strh	r3, [r4, #22]
@@ -15085,7 +15085,7 @@ Disassembly of section .data:
 2000082c:	4a03      	ldr	r2, [pc, #12]	; (2000083c <_hw_endpoint_buffer_control_update32+0x50>)
 2000082e:	589a      	ldr	r2, [r3, r2]
 20000830:	4803      	ldr	r0, [pc, #12]	; (20000840 <_hw_endpoint_buffer_control_update32+0x54>)
-20000832:	f000 f9a5 	bl	20000b80 <__panic_veneer>
+20000832:	f000 f99d 	bl	20000b70 <__panic_veneer>
 20000836:	46c0      	nop			; (mov r8, r8)
 20000838:	fffffbff 	.word	0xfffffbff
 2000083c:	20000c68 	.word	0x20000c68
@@ -15175,7 +15175,7 @@ Disassembly of section .data:
 200008ee:	4a09      	ldr	r2, [pc, #36]	; (20000914 <hw_endpoint_xfer_continue+0x48>)
 200008f0:	589a      	ldr	r2, [r3, r2]
 200008f2:	4809      	ldr	r0, [pc, #36]	; (20000918 <hw_endpoint_xfer_continue+0x4c>)
-200008f4:	f000 f944 	bl	20000b80 <__panic_veneer>
+200008f4:	f000 f93c 	bl	20000b70 <__panic_veneer>
 200008f8:	0020      	movs	r0, r4
 200008fa:	f7ff fecd 	bl	20000698 <e15_is_critical_frame_period>
 200008fe:	1e05      	subs	r5, r0, #0
@@ -15233,7 +15233,7 @@ Disassembly of section .data:
 2000096c:	6048      	str	r0, [r1, #4]
 2000096e:	0029      	movs	r1, r5
 20000970:	0020      	movs	r0, r4
-20000972:	f000 f8ed 	bl	20000b50 <__tu_fifo_write_veneer>
+20000972:	f000 f905 	bl	20000b80 <__tu_fifo_write_veneer>
 20000976:	6962      	ldr	r2, [r4, #20]
 20000978:	69a3      	ldr	r3, [r4, #24]
 2000097a:	f3bf 8f5f 	dmb	sy
@@ -15270,7 +15270,7 @@ Disassembly of section .data:
 200009c0:	6048      	str	r0, [r1, #4]
 200009c2:	0029      	movs	r1, r5
 200009c4:	0020      	movs	r0, r4
-200009c6:	f000 f8c3 	bl	20000b50 <__tu_fifo_write_veneer>
+200009c6:	f000 f8db 	bl	20000b80 <__tu_fifo_write_veneer>
 200009ca:	6962      	ldr	r2, [r4, #20]
 200009cc:	69a3      	ldr	r3, [r4, #24]
 200009ce:	f3bf 8f5f 	dmb	sy
@@ -15302,7 +15302,7 @@ Disassembly of section .data:
 20000a0a:	6048      	str	r0, [r1, #4]
 20000a0c:	0029      	movs	r1, r5
 20000a0e:	0020      	movs	r0, r4
-20000a10:	f000 f89e 	bl	20000b50 <__tu_fifo_write_veneer>
+20000a10:	f000 f8b6 	bl	20000b80 <__tu_fifo_write_veneer>
 20000a14:	6962      	ldr	r2, [r4, #20]
 20000a16:	69a3      	ldr	r3, [r4, #24]
 20000a18:	f3bf 8f5f 	dmb	sy
@@ -15360,7 +15360,7 @@ Disassembly of section .data:
 20000a84:	220c      	movs	r2, #12
 20000a86:	2100      	movs	r1, #0
 20000a88:	a801      	add	r0, sp, #4
-20000a8a:	f000 f849 	bl	20000b20 <____wrap_memset_veneer>
+20000a8a:	f000 f851 	bl	20000b30 <____wrap_memset_veneer>
 20000a8e:	782b      	ldrb	r3, [r5, #0]
 20000a90:	466a      	mov	r2, sp
 20000a92:	7113      	strb	r3, [r2, #4]
@@ -15380,7 +15380,7 @@ Disassembly of section .data:
 20000ab2:	6048      	str	r0, [r1, #4]
 20000ab4:	a901      	add	r1, sp, #4
 20000ab6:	0020      	movs	r0, r4
-20000ab8:	f000 f84a 	bl	20000b50 <__tu_fifo_write_veneer>
+20000ab8:	f000 f862 	bl	20000b80 <__tu_fifo_write_veneer>
 20000abc:	6962      	ldr	r2, [r4, #20]
 20000abe:	69a3      	ldr	r3, [r4, #24]
 20000ac0:	f3bf 8f5f 	dmb	sy
@@ -15402,7 +15402,7 @@ Disassembly of section .data:
 20000ae8:	6048      	str	r0, [r1, #4]
 20000aea:	0029      	movs	r1, r5
 20000aec:	0020      	movs	r0, r4
-20000aee:	f000 f82f 	bl	20000b50 <__tu_fifo_write_veneer>
+20000aee:	f000 f847 	bl	20000b80 <__tu_fifo_write_veneer>
 20000af2:	6962      	ldr	r2, [r4, #20]
 20000af4:	69a3      	ldr	r3, [r4, #24]
 20000af6:	f3bf 8f5f 	dmb	sy
@@ -15421,41 +15421,41 @@ Disassembly of section .data:
 20000b1c:	4770      	bx	lr
 20000b1e:	46c0      	nop			; (mov r8, r8)
 
-20000b20 <____wrap_memset_veneer>:
+20000b20 <____wrap_memcpy_veneer>:
 20000b20:	b401      	push	{r0}
-20000b22:	4802      	ldr	r0, [pc, #8]	; (20000b2c <____wrap_memset_veneer+0xc>)
+20000b22:	4802      	ldr	r0, [pc, #8]	; (20000b2c <____wrap_memcpy_veneer+0xc>)
 20000b24:	4684      	mov	ip, r0
 20000b26:	bc01      	pop	{r0}
 20000b28:	4760      	bx	ip
 20000b2a:	bf00      	nop
-20000b2c:	10004a5d 	.word	0x10004a5d
+20000b2c:	10004a69 	.word	0x10004a69
 
-20000b30 <__time_us_64_veneer>:
+20000b30 <____wrap_memset_veneer>:
 20000b30:	b401      	push	{r0}
-20000b32:	4802      	ldr	r0, [pc, #8]	; (20000b3c <__time_us_64_veneer+0xc>)
+20000b32:	4802      	ldr	r0, [pc, #8]	; (20000b3c <____wrap_memset_veneer+0xc>)
 20000b34:	4684      	mov	ip, r0
 20000b36:	bc01      	pop	{r0}
 20000b38:	4760      	bx	ip
 20000b3a:	bf00      	nop
-20000b3c:	10001c9d 	.word	0x10001c9d
+20000b3c:	10004a5d 	.word	0x10004a5d
 
-20000b40 <____wrap___aeabi_lmul_veneer>:
+20000b40 <__best_effort_wfe_or_timeout_veneer>:
 20000b40:	b401      	push	{r0}
-20000b42:	4802      	ldr	r0, [pc, #8]	; (20000b4c <____wrap___aeabi_lmul_veneer+0xc>)
+20000b42:	4802      	ldr	r0, [pc, #8]	; (20000b4c <__best_effort_wfe_or_timeout_veneer+0xc>)
 20000b44:	4684      	mov	ip, r0
 20000b46:	bc01      	pop	{r0}
 20000b48:	4760      	bx	ip
 20000b4a:	bf00      	nop
-20000b4c:	100048e9 	.word	0x100048e9
+20000b4c:	10001b49 	.word	0x10001b49
 
-20000b50 <__tu_fifo_write_veneer>:
+20000b50 <____wrap___aeabi_lmul_veneer>:
 20000b50:	b401      	push	{r0}
-20000b52:	4802      	ldr	r0, [pc, #8]	; (20000b5c <__tu_fifo_write_veneer+0xc>)
+20000b52:	4802      	ldr	r0, [pc, #8]	; (20000b5c <____wrap___aeabi_lmul_veneer+0xc>)
 20000b54:	4684      	mov	ip, r0
 20000b56:	bc01      	pop	{r0}
 20000b58:	4760      	bx	ip
 20000b5a:	bf00      	nop
-20000b5c:	10007241 	.word	0x10007241
+20000b5c:	100048e9 	.word	0x100048e9
 
 20000b60 <__hw_endpoint_get_by_addr_veneer>:
 20000b60:	b401      	push	{r0}
@@ -15466,32 +15466,32 @@ Disassembly of section .data:
 20000b6a:	bf00      	nop
 20000b6c:	100053d9 	.word	0x100053d9
 
-20000b70 <____wrap_memcpy_veneer>:
+20000b70 <__panic_veneer>:
 20000b70:	b401      	push	{r0}
-20000b72:	4802      	ldr	r0, [pc, #8]	; (20000b7c <____wrap_memcpy_veneer+0xc>)
+20000b72:	4802      	ldr	r0, [pc, #8]	; (20000b7c <__panic_veneer+0xc>)
 20000b74:	4684      	mov	ip, r0
 20000b76:	bc01      	pop	{r0}
 20000b78:	4760      	bx	ip
 20000b7a:	bf00      	nop
-20000b7c:	10004a69 	.word	0x10004a69
+20000b7c:	10002a49 	.word	0x10002a49
 
-20000b80 <__panic_veneer>:
+20000b80 <__tu_fifo_write_veneer>:
 20000b80:	b401      	push	{r0}
-20000b82:	4802      	ldr	r0, [pc, #8]	; (20000b8c <__panic_veneer+0xc>)
+20000b82:	4802      	ldr	r0, [pc, #8]	; (20000b8c <__tu_fifo_write_veneer+0xc>)
 20000b84:	4684      	mov	ip, r0
 20000b86:	bc01      	pop	{r0}
 20000b88:	4760      	bx	ip
 20000b8a:	bf00      	nop
-20000b8c:	10002a49 	.word	0x10002a49
+20000b8c:	10007241 	.word	0x10007241
 
-20000b90 <__best_effort_wfe_or_timeout_veneer>:
+20000b90 <__time_us_64_veneer>:
 20000b90:	b401      	push	{r0}
-20000b92:	4802      	ldr	r0, [pc, #8]	; (20000b9c <__best_effort_wfe_or_timeout_veneer+0xc>)
+20000b92:	4802      	ldr	r0, [pc, #8]	; (20000b9c <__time_us_64_veneer+0xc>)
 20000b94:	4684      	mov	ip, r0
 20000b96:	bc01      	pop	{r0}
 20000b98:	4760      	bx	ip
 20000b9a:	bf00      	nop
-20000b9c:	10001b49 	.word	0x10001b49
+20000b9c:	10001c9d 	.word	0x10001c9d
 
 20000ba0 <____assert_func_veneer>:
 20000ba0:	b401      	push	{r0}
