@@ -38,6 +38,9 @@ void uart_send_char(char c) {
 }
 
 void uart_send_string(const char *str) {
+
+    printf("string: %s\n", str);
+
     if (str == NULL) return;
     while (*str) {
         uart_putc_raw(UART_ID, *str);
