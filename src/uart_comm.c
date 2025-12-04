@@ -49,6 +49,16 @@ void uart_send_string(const char *str) {
     uart_putc_raw(UART_ID, '\n');
 }
 
+void uart_send_tele(const char *str) {
+    printf("string: %s\n", str);
+    if (str == NULL) return;
+    while (*str) {
+        uart_putc_raw(UART_ID, *str);
+        str++;
+    }
+    uart_putc_raw(UART_ID, '\n');
+}
+
 void uart_send_raw(const char *data, size_t len) {
     if (data == NULL || len == 0) return;
     for (size_t i = 0; i < len; i++) {

@@ -95,18 +95,29 @@ static void turn_left() {
     float start, r, p;
     imu_read(&start, &r, &p);
 
-    motors_left();
+    motors_left(); // Start turning fast
     uint32_t t0 = to_ms_since_boot(get_absolute_time());
 
     while (true) {
         float now;
         imu_read(&now, &r, &p);
+        float diff = fabsf(angle_diff(start, now));
 
-        if (fabsf(angle_diff(start, now)) >= TARGET_TURN_ANGLE) break;
+        // 1. Check if we are done
+        if (diff >= TARGET_TURN_ANGLE) break;
+
+        // 2. SLOW DOWN if we are close (within 20 degrees)
+        if (TARGET_TURN_ANGLE - diff < 20.0f) {
+            motors_set_speed(40); // Slow down to 40% speed
+            motors_left();        // Re-apply slow speed
+        }
+
+        // Timeout safety
         if (to_ms_since_boot(get_absolute_time()) - t0 > TURN_TIMEOUT_MS) break;
     }
 
     reset_turn_state();
+    motors_set_speed(MOVE_SPEED_PERCENT); // Restore normal speed
 
     // === FIX: UPDATE POSE θ AFTER TURN ===
     float h;
@@ -121,24 +132,39 @@ static void turn_right() {
     float start, r, p;
     imu_read(&start, &r, &p);
 
-    motors_right();
+    motors_right(); // Start turning fast
     uint32_t t0 = to_ms_since_boot(get_absolute_time());
 
     while (true) {
         float now;
         imu_read(&now, &r, &p);
+        float diff = fabsf(angle_diff(start, now));
 
-        if (fabsf(angle_diff(start, now)) >= TARGET_TURN_ANGLE) break;
+        // 1. Check if we are done
+        if (diff >= TARGET_TURN_ANGLE) break;
+
+        // 2. SLOW DOWN if we are close (within 20 degrees)
+        if (TARGET_TURN_ANGLE - diff < 20.0f) {
+            motors_set_speed(40); // Slow down to 40% speed
+            motors_right();       // Re-apply slow speed (RIGHT)
+        }
+
+        // Timeout safety
         if (to_ms_since_boot(get_absolute_time()) - t0 > TURN_TIMEOUT_MS) break;
     }
 
     reset_turn_state();
+    motors_set_speed(MOVE_SPEED_PERCENT); // Restore normal speed
 
     // === FIX: UPDATE POSE θ AFTER TURN ===
     float h;
     imu_read(&h, &r, &p);
     robot_pose.theta = h * (M_PI / 180.0f);
 }
+
+int telemetry_counter = 0;
+char status_str[] = "none";
+bool is_moving_forward = false;
 
 // ================================================================
 // MAIN
@@ -203,6 +229,7 @@ int main() {
     char msg_buffer[UART_MAX_MESSAGE_LEN];
     char tele_buffer[UART_MAX_MESSAGE_LEN];
     char active_command = 0;
+    bool is_moving_forward = false;
 
     while (true) {
 
@@ -211,84 +238,151 @@ int main() {
         if (encoder_check_pulse(RIGHT_ENCODER_PIN)) right_pulses++;
 
         uart_comm_process();
+        
 
         if (uart_receive_message(msg_buffer, UART_MAX_MESSAGE_LEN)) {
             if (strlen(msg_buffer) > 0)
                 active_command = msg_buffer[0];
         }
 
+        telemetry_counter++;
+        if (telemetry_counter >= 10) { // Send only every 10th time (approx 100ms)
+            sprintf(tele_buffer, "PX,%.1f,%.1f,%.2f,%s", 
+                robot_pose.x, 
+                robot_pose.y, 
+                robot_pose.theta * (180.0f / M_PI), 
+                status_str
+            );
+            uart_send_tele(tele_buffer);
+            telemetry_counter = 0;
+        }
+
         
 
         switch (active_command) {
-            printf("Active Command: '%c' \n", active_command);
-            
+            // printf("Active Command: '%c' \n", active_command); // Optional: Comment out to reduce spam
 
             case 'w': case 'W':
+                strcpy(status_str, "none");
+                if (!is_moving_forward) {
+                    drift_correction_start();
+                    is_moving_forward = true;
+                }
+                
                 motors_set_speed(MOVE_SPEED_PERCENT);
                 motors_forward();
-                motors_forward_bias(0, 0);
+                                
                 update_odometry_heading(left_pulses, right_pulses);
                 drift_correction_update();
-                printf("Move Forward");
-
-                // sprintf(tele_buffer, "X: %.3f  Y: %.3f Deg: %.2f", robot_pose.x, robot_pose.y, robot_pose.theta * (180.0f / M_PI));
-                // uart_send_string(tele_buffer);
+                // printf("Move Forward");
 
                 left_pulses = 0;
                 right_pulses = 0;
                 break;
 
             case 's': case 'S':
+                if (is_moving_forward) {
+                    drift_correction_stop();
+                    is_moving_forward = false;
+                }
+                
                 motors_set_speed(MOVE_SPEED_PERCENT);
                 motors_backward();
                 update_odometry_heading(-left_pulses, -right_pulses);
                 printf("Backward\n");
-                // sprintf(tele_buffer, "X: %.3f  Y: %.3f Deg: %.2f", robot_pose.x, robot_pose.y, robot_pose.theta * (180.0f / M_PI));
-                uart_send_string("done");
                 sleep_ms(2000);
 
+                strcpy(status_str, "done");
+                sprintf(tele_buffer, "PX,%.1f,%.1f,%.2f,%s", 
+                    robot_pose.x, 
+                    robot_pose.y, 
+                    robot_pose.theta * (180.0f / M_PI), 
+                    status_str
+                );
+                uart_send_tele(tele_buffer);
 
                 left_pulses = 0;
                 right_pulses = 0;
                 break;
 
             case 'd': case 'D':
+                if (is_moving_forward) {
+                    drift_correction_stop();
+                    is_moving_forward = false;
+                }
                 turn_right();
-                uart_send_string("done");
-                printf("Left");
+                printf("Right\n"); // Fixed label (was Left)
+                sleep_ms(2000);
+
+                strcpy(status_str, "done");
+
+                sprintf(tele_buffer, "PX,%.1f,%.1f,%.2f,%s", 
+                    robot_pose.x, 
+                    robot_pose.y, 
+                    robot_pose.theta * (180.0f / M_PI), 
+                    status_str
+                );
+                uart_send_tele(tele_buffer);
+
+                
                 active_command = 0;
                 break;
 
             case 'a': case 'A':
+                if (is_moving_forward) {
+                    drift_correction_stop();
+                    is_moving_forward = false;
+                }
                 turn_left();
-                uart_send_string("done");
-                printf("Right");
+                strcpy(status_str, "done");
+                printf("Left\n"); // Fixed label (was Right)
+                sleep_ms(2000);
+
+                sprintf(tele_buffer, "PX,%.1f,%.1f,%.2f,%s", 
+                    robot_pose.x, 
+                    robot_pose.y, 
+                    robot_pose.theta * (180.0f / M_PI), 
+                    status_str
+                );
+                uart_send_tele(tele_buffer);
+
+                
                 active_command = 0;
                 break;
 
             case 'q': case 'Q':
+
+                strcpy(status_str, "none");
+
+                if (is_moving_forward) {
+                    drift_correction_stop();
+                    is_moving_forward = false;
+                }
                 motors_stop();
                 active_command = 0;
                 break;
 
             default:
-                // motors_set_speed(MOVE_SPEED_PERCENT);
-                // motors_forward();
-                // motors_forward_bias(0, 0);
+                // If we fall here, we should probably stop everything to be safe
+                if (is_moving_forward) {
+                    drift_correction_stop();
+                    is_moving_forward = false;
+                }
+                motors_stop(); // Ensure motors are stopped in default state
+                
                 update_odometry_heading(left_pulses, right_pulses);
-                drift_correction_update();
                 sleep_ms(1);
                 left_pulses = 0;
                 right_pulses = 0;
                 break;
         }
 
-        printf("POS => X: %.3f  Y: %.3f  THETA: %.2f°\n",
-            robot_pose.x,
-            robot_pose.y,
-            robot_pose.theta * (180.0f / M_PI));
+        // printf("POS => X: %.3f  Y: %.3f  THETA: %.2f°\n",
+        //     robot_pose.x,
+        //     robot_pose.y,
+        //     robot_pose.theta * (180.0f / M_PI));
 
-        sleep_ms(10);
+        sleep_us(100);
     }
 
     return 0;
