@@ -34,6 +34,7 @@ void uart_comm_process(void);
 // Check if a normal text message (non-Pose) is waiting
 bool uart_has_message(void);
 
+// Get the next normal text message
 bool uart_receive_message(char *buffer, size_t max_len);
 
 // 4. POSE DATA
